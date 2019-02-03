@@ -4,6 +4,15 @@ import numpy as np
 
 class Model_NP(Agent):
     def save_model(self, directoryNum, roundNum, epoch):
+        """Save the model
+
+        Arguments:
+            Agent {Agent} -- agent class
+            directoryNum {int} -- directory num
+            roundNum {int} -- round num
+            epoch {int} -- epoch
+        """
+
         super().save_model(directoryNum, roundNum, epoch)
         directory = f"/Models/tmp{directoryNum}/r{roundNum}/modele{epoch}.txt"
         np.savetxt(directory, self.get_weights())

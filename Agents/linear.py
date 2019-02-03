@@ -11,6 +11,12 @@ class Linear(Model_NP):
         # randomly initialize weights from 0 to 10
 
     def gradient_descent(self, rewards):
+        """Apply the TD(0) gradient descent scheme
+
+        Arguments:
+            rewards {int} -- reward from the action just taken
+        """
+
         # formula :
         # w <- w + alpha [R + gamma v(s') - v(s)]del v(s) wrt w
         # because this is a linear model, del is 1
@@ -21,6 +27,13 @@ class Linear(Model_NP):
         self.weights -= var_rate * self.distances
 
     def init_weights(self):
+        """Initializes weights
+
+        Raises:
+            Exception -- if the weight scheme given during initialization 
+            does not exist an appropriate scheme, throw an exception
+        """
+
         if (self.WEIGHT_SCHEME == "RAND"):
             self.weights = np.random.rand((self.WORLD.itemList.shape)[0], 2)
         elif (self.WEIGHT_SCHEME == "ZERO"):
@@ -29,6 +42,13 @@ class Linear(Model_NP):
             raise Exception('Unknown Weight Scheme')
 
     def execute_policy(self):
+        """Execute the optimal policy
+
+        Returns:
+            int -- returns the int corresponding to the action 
+            (index of the action in the matrix of self.ACTION_EFFECTS)
+        """
+
         self.PREDICTION_0 = self.predict_value()
         action = super().execute_policy()
         # self.PREDICTION_0 = self.predict_value(actionIndex=action)
@@ -80,7 +100,21 @@ class Linear(Model_NP):
         return value
 
     def load_model(self, directory):
+        """Load a model from a specific directory. 
+        Should be saved as an np.savetxt file.
+
+        Arguments:
+            directory {str} -- directory of the filename.
+        """
+
         self.weights = np.loadtxt(directory)
 
     def get_weights(self):
+        """Helper for the model save method. 
+        Should return the relevant weights of a model that need to be saved.
+
+        Returns:
+            matrix -- matrix of the weights
+        """
+
         return self.weights

@@ -69,13 +69,31 @@ class Agent:
         print(f"Reward: {reward} | Total Reward: {self.totalReward} ")
 
     def save_model(self, directoryNum, roundNum, epoch):
+        """Save model - only creates the directory if necessary. Child models should define which weights need to be saved, etc.
+
+        Arguments:
+            directoryNum {int} -- directory num
+            roundNum {int} -- round num
+            epoch {int} -- epoch
+        """
+
         save_path = f"/Models/tmp{directoryNum}/r{roundNum}/"
         if not os.path.exists(save_path):
             os.makedirs(save_path)
 
-    def end_round(self, run_NUM=-1, round_num=-1):
+    def end_round(self, RUN_NUM=-1, round_num=-1):
+        """End round and record necessary info. Reset total reward
+
+        Keyword Arguments:
+            RUN_NUM {int} -- the current run (default: {-1})
+            round_num {int} -- the current round (default: {-1})
+        """
+
         self.totalReward = 0
         pass
 
     def gradient_descent(self):
+        """Empty method that almost all models will have.
+        """
+
         pass
