@@ -4,8 +4,8 @@ from .model_NP import Model_NP
 
 
 class Linear(Model_NP):
-    def __init__(self, epsilon, decay, availableActions, dimensions,
-                 weight_scheme="RAND", learning_rate=0.001):
+    def __init__(self, epsilon, decay, availableActions,
+                 dimensions, weight_scheme="RAND", learning_rate=0.001):
         super().__init__(self, epsilon, decay, availableActions, dimensions)
         self.WEIGHTS_SET = False
         self.LEARNING_RATE = learning_rate
@@ -43,7 +43,7 @@ class Linear(Model_NP):
         """Execute the optimal policy
 
         Returns:
-            int -- returns the int corresponding to the action 
+            int -- returns the int corresponding to the action
             (index of the action in the matrix of self.ACTION_EFFECTS)
         """
 
