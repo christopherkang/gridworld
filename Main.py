@@ -66,8 +66,19 @@ def showPotentialAction(environment):
     cv2.destroyAllWindows()
 
 
-def run_trial(agent, world_template, rounds, epochs, save=True):
-    world = copy.deepcopy(world_template)
+def run_epoch(agent, world, round_num, epochs, save=True):
+    for epoch in range(epochs):
+        agent.consume_reward(world.move_agent(
+            agent.execute_policy()))
+        cv2.imshow('image', cv2.resize(world.get_representation(
+            showAgent=True, scaleEnvironment=True), (200, 200),
+            interpolation=cv2.INTER_NEAREST))
+        cv2.waitKey(20)
+        if save:
+            agent.save_model(RUN_NUM, round_num, epoch)
+
+
+def run_trial(agent, rounds, epochs, save=True):
     save_path = f"/Models/tmp{RUN_NUM}/"
     if save:
         if not os.path.exists(save_path):
@@ -75,20 +86,13 @@ def run_trial(agent, world_template, rounds, epochs, save=True):
 
         p.dump(params, open(f"/Models/tmp{RUN_NUM}/env.txt", "wb"))
 
-    for roundNum in range(rounds):
+    for round_num in range(rounds):
+        world = Gridworld(WORLD_SIZE, ACTION_INFO, auto_params)
         agent.set_world(world)
         world.place_agent(10, 10)
-        for epoch in range(epochs):
-            agent.consume_reward(world.move_agent(
-                agent.execute_policy()))
-            cv2.imshow('image', cv2.resize(world.get_representation(
-                showAgent=True, scaleEnvironment=True), (200, 200),
-                interpolation=cv2.INTER_NEAREST))
-            cv2.waitKey(20)
-            if save:
-                agent.save_model(RUN_NUM, roundNum, epoch)
+        run_epoch(agent, world, round_num, epochs, save=save)
         if save:
-            agent.end_round(RUN_NUM, roundNum)
+            agent.end_round(RUN_NUM, round_num)
 
 
 def test_agent(directory):
@@ -106,6 +110,5 @@ if __name__ == "__main__":
         weight_scheme="ZERO", learning_rate=0.01
     )
     # agent = test_agent("/Models/tmp9/r50/modele99.txt")
-    world = Gridworld(WORLD_SIZE, ACTION_INFO, auto_params)
     # world.load_world("/Models/tmp9/env.txt")
-    run_trial(agent, world, 100, 100, save=True)
+    run_trial(agent, 100, 100, save=True)
