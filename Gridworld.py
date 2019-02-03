@@ -38,7 +38,7 @@ class Gridworld:
     def __str__(self):
         return self.get_representation(True, True)
 
-    def place_agent(self, xCoord, yCoord):
+    def place_agent(self, x_coord, y_coord):
         """Place agent on map; assumes agent doesn't exist.
 
         Arguments:
@@ -52,12 +52,12 @@ class Gridworld:
         if (self.does_agent_exist):
             return False
         else:
-            self.xAgent = xCoord
-            self.yAgent = yCoord
+            self.x_agent = x_coord
+            self.y_agent = y_coord
             self.does_agent_exist = True
             self.create_proximity_map()
 
-    def distance_to_objects(self, xCoord, yCoord):
+    def distance_to_objects(self, x_coord, y_coord):
         """Return matrix with distance to relevant objects
 
         Arguments:
@@ -68,7 +68,7 @@ class Gridworld:
             matrix -- matrix of each item and it's value / x delta / y delta
         """
 
-        distance_matrix = [[row[0], row[1] - xCoord, row[2] - yCoord]
+        distance_matrix = [[row[0], row[1] - x_coord, row[2] - y_coord]
                            for row in self.item_list if row[1]]
         return distance_matrix
 
@@ -79,20 +79,20 @@ class Gridworld:
             (int, int) -- coordinates of agent
 
         """
-        return (self.xAgent, self.yAgent)
+        return (self.x_agent, self.y_agent)
 
-    def move_possible(self, xyTuple):
+    def move_possible(self, xy_tuple):
         """Identify if a move is possible. Requires agent to be initialized
 
         Arguments:
-            xyTuple {Tuple} -- change in x and y position
+            xy_tuple {Tuple} -- change in x and y position
 
         Returns:
             Bool -- returns whether the move is possible
         """
 
-        xEnd = self.xAgent + xyTuple[0]
-        yEnd = self.yAgent + xyTuple[1]
+        xEnd = self.x_agent + xy_tuple[0]
+        yEnd = self.y_agent + xy_tuple[1]
         if (xEnd < 0 or xEnd > self.x_size - 1 or
             yEnd < 0 or yEnd > self.y_size - 1 or
                 self.blocks[yEnd, xEnd] == 1):
@@ -119,32 +119,32 @@ class Gridworld:
         else:
             raise Exception("Agent does not exist!")
 
-    def appropriate_move(self, xyTuple, debugging=False):
+    def appropriate_move(self, xy_tuple, debugging=False):
         """Decide if a move is appropriate and take it if necessary
 
         Arguments:
-            xyTuple {Tuple} -- change in x and y position
+            xy_tuple {Tuple} -- change in x and y position
 
         Returns:
             int -- return reward of moving to that square
         """
 
-        xEnd = self.xAgent + xyTuple[0]
-        yEnd = self.yAgent + xyTuple[1]
+        xEnd = self.x_agent + xy_tuple[0]
+        yEnd = self.y_agent + xy_tuple[1]
         if debugging:
             print(f"Target end position: ({xEnd}, {yEnd})")
-        if (self.move_possible(xyTuple)):
-            self.xAgent = xEnd
-            self.yAgent = yEnd
+        if (self.move_possible(xy_tuple)):
+            self.x_agent = xEnd
+            self.y_agent = yEnd
             self.epoch += 1
-            output = self.representation[self.yAgent, self.xAgent]
+            output = self.representation[self.y_agent, self.x_agent]
 
             # clear item
-            self.representation[self.yAgent, self.xAgent] = 0
+            self.representation[self.y_agent, self.x_agent] = 0
 
             # remove item from proximity map
             for row in self.prox_map:
-                if (row[1] == self.xAgent and row[2] == self.yAgent):
+                if (row[1] == self.x_agent and row[2] == self.y_agent):
                     row[0] = 0
             return output
         return self.collision_penalty
@@ -166,10 +166,10 @@ class Gridworld:
         if (scaleEnvironment):
             output /= max(output.max(), 1) * 2
         if (showAgent):
-            output[self.yAgent, self.xAgent] = 255
+            output[self.y_agent, self.x_agent] = 255
         return output
 
-    def return_vision(self, xDist, yDist):
+    def return_vision(self, x_dist, y_dist):
         """Return what an agent "would" be able to see
 
         Arguments:
@@ -182,36 +182,36 @@ class Gridworld:
         """
 
         if (self.does_agent_exist):
-            output = np.zeros((2 * yDist + 1, 2 * xDist + 1))
+            output = np.zeros((2 * y_dist + 1, 2 * x_dist + 1))
 
-            for xCoord in range(-xDist, xDist + 1):
-                for yCoord in range(-yDist, yDist + 1):
-                    xPos = self.xAgent + xCoord
-                    yPos = self.yAgent + yCoord
-                    if (xPos < 0 or xPos >= self.x_size) or (
-                            yPos < 0 or yPos >= self.y_size):
-                        output[yCoord + yDist, xCoord + xDist] = -np.infty
+            for x_coord in range(-x_dist, x_dist + 1):
+                for y_coord in range(-y_dist, y_dist + 1):
+                    x_pos = self.x_agent + x_coord
+                    y_pos = self.y_agent + y_coord
+                    if (x_pos < 0 or x_pos >= self.x_size) or (
+                            y_pos < 0 or y_pos >= self.y_size):
+                        output[y_coord + y_dist, x_coord + x_dist] = -np.infty
                     else:
-                        output[yCoord + yDist, xCoord +
-                               xDist] = self.representation[yPos, xPos]
+                        output[y_coord + y_dist, x_coord +
+                               x_dist] = self.representation[y_pos, x_pos]
             return output
         else:
             return False
 
-    def simulate_action(self, xyTuple):
+    def simulate_action(self, xy_tuple):
         """Return simulated matrix if a specific move was made
 
         Arguments:
-            xyTuple {Tuple} -- change in x and y position
+            xy_tuple {Tuple} -- change in x and y position
 
         Returns:
             matrix -- matrix representation of environment
         """
 
         output = np.array(self.get_representation(True, True))
-        if (self.move_possible(xyTuple)):
-            output[self.yAgent, self.xAgent] = 0
-            output[self.yAgent + xyTuple[1], self.xAgent + xyTuple[0]] = 1
+        if (self.move_possible(xy_tuple)):
+            output[self.y_agent, self.x_agent] = 0
+            output[self.y_agent + xy_tuple[1], self.x_agent + xy_tuple[0]] = 1
             return output
         else:
             return output
@@ -232,14 +232,14 @@ class Gridworld:
 
         self.prox_map = np.array([row[[0, 2, 3]]
                                   for row in self.item_list if row[1]])
-        self.prox_map[:, 1] -= (self.xAgent)
-        self.prox_map[:, 2] -= (self.yAgent)
+        self.prox_map[:, 1] -= (self.x_agent)
+        self.prox_map[:, 2] -= (self.y_agent)
 
-    def update_proximity_map(self, xyTuple, speculative=False):
+    def update_proximity_map(self, xy_tuple, speculative=False):
         """Update proximity map
 
         Arguments:
-            xyTuple {Tuple} -- change in x and y position
+            xy_tuple {Tuple} -- change in x and y position
 
         Keyword Arguments:
             speculative {bool} -- Choose whether to update the proximity map
@@ -258,8 +258,8 @@ class Gridworld:
     def calculate_prox_map(self):
         prox_map = np.array([row[[0, 2, 3]]
                              for row in self.item_list if row[1]])
-        prox_map[:, 1] -= (self.xAgent)
-        prox_map[:, 2] -= (self.yAgent)
+        prox_map[:, 1] -= (self.x_agent)
+        prox_map[:, 2] -= (self.y_agent)
         return prox_map
 
     def load_world(self, directory):
