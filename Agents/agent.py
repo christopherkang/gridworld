@@ -69,7 +69,7 @@ class Agent:
         print(f"Reward: {reward} | Total Reward: {self.totalReward} ")
 
     def save_model(self, directoryNum, roundNum, epoch):
-        save_path = f"./Models/tmp{directoryNum}/r{roundNum}/"
+        save_path = f"/Models/tmp{directoryNum}/r{roundNum}/"
         if not os.path.exists(save_path):
             os.makedirs(save_path)
 

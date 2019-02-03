@@ -29,15 +29,15 @@ class Model_TF(Agent):
     def save_model(self, directoryNum, roundNum, epoch):
         super.save_model(directoryNum, roundNum, epoch)
         self.saver.save(
-            self.sess, f"./BasicGridworld/Models/tmp{directoryNum}/r{roundNum}/modele{epoch}.ckpt")
+            self.sess, f"/BasicGridworld/Models/tmp{directoryNum}/r{roundNum}/modele{epoch}.ckpt")
 
     def restore_model(self, directoryNum, roundNum, epoch):
         self.saver.restore(
-            self.sess, f"./BasicGridworld/Models/tmp{directoryNum}/r{roundNum}/modele{epoch}.ckpt")
+            self.sess, f"/BasicGridworld/Models/tmp{directoryNum}/r{roundNum}/modele{epoch}.ckpt")
         print("Model restored")
 
     def end_round(self, directoryNum, roundNum):
-        with open(f"./BasicGridworld/Models/tmp{directoryNum}/r{roundNum}/summary.txt", "w") as f:
+        with open(f"/BasicGridworld/Models/tmp{directoryNum}/r{roundNum}/summary.txt", "w") as f:
             f.write(f"TOTAL_REWARD: {self.totalReward}")
         self.totalReward = 0
 
