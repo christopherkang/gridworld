@@ -6,10 +6,20 @@ import tensorflow as tf
 
 class Agent:
     def __init__(self, world, epsilon, decay, availableActions, dimensions):
+        """Basic init for the Agent class.
+
+        Arguments:
+            world {pointer to Gridworld} -- pointer to Gridworld agent is in
+            epsilon {int} -- epsilon value to use for e-greedy approach
+            decay {int} -- gamma to use in gradient descent
+            availableActions {[[], []]} -- nested list with action info
+            dimensions {tuple} -- info with the world size
+        """
+
         self.WORLD = world
         self.ACTION_BANK = availableActions[0]
         self.ACTION_EFFECTS = availableActions[1]
-        self.totalReward = 0
+        self.total_reward = 0
         self.EPSILON = epsilon
         self.DECAY = decay
 
@@ -29,29 +39,36 @@ class Agent:
         Arguments:
 
         """
-        maxIndex = -1
-        maxValue = -np.nan
-        numberOfActions = len(self.ACTION_BANK)
-        stateVals = []
+        max_index = -1
+        max_value = -np.nan
+        number_of_actions = len(self.ACTION_BANK)
+        state_values = []
+        probability_list = np.zeros((number_of_actions))
 
-        for index in range(numberOfActions):  # for each action
+        for index in range(number_of_actions):  # for each action
             actionVal = np.asscalar((self.predict_value(index)))
             # predict the state value of the action
-            stateVals.append(actionVal)
-            if actionVal > maxValue:
+            state_values.append(actionVal)
+            if actionVal > max_value:
                 # if the value is greater than the previous
-                maxIndex = index
-                maxValue = actionVal
-        print(stateVals)
+                max_index = index
+                max_value = actionVal
+        print(state_values)
 
-        probMatrix = np.zeros((numberOfActions))
-        if (maxIndex == -1):
-            probMatrix += 1 / numberOfActions
+        if (max_index == -1):
+            # if there is no best action, all actions have equal probability
+            probability_list += 1 / number_of_actions
         else:
-            probMatrix += self.EPSILON / numberOfActions
-            probMatrix[maxIndex] = 1 - self.EPSILON + \
-                self.EPSILON / numberOfActions
-        choice = int(np.random.choice(numberOfActions, 1, p=probMatrix))
+            # use e-greedy approach
+            probability_list += self.EPSILON / number_of_actions
+            probability_list[max_index] = 1 - self.EPSILON + \
+                self.EPSILON / number_of_actions
+
+        choice = int(
+            np.random.choice(
+                number_of_actions,
+                1,
+                p=probability_list))
         if print_action:
             print(self.ACTION_BANK[choice])
         return choice
@@ -64,9 +81,9 @@ class Agent:
             world {GridWorld} -- not necessary
         """
 
-        self.totalReward += reward
+        self.total_reward += reward
         self.gradient_descent(reward)
-        print(f"Reward: {reward} | Total Reward: {self.totalReward} ")
+        print(f"Reward: {reward} | Total Reward: {self.total_reward} ")
 
     def save_model(self, directoryNum, roundNum, epoch):
         """Save model - only creates the directory if necessary.
@@ -90,7 +107,7 @@ class Agent:
             round_num {int} -- the current round (default: {-1})
         """
 
-        self.totalReward = 0
+        self.total_reward = 0
         pass
 
     def gradient_descent(self):

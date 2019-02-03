@@ -1,6 +1,7 @@
 import numpy as np
 import pickle as p
 
+
 class Gridworld:
     """Gridworld class
 
@@ -18,26 +19,26 @@ class Gridworld:
             ySize {int} -- size of matrix in axis 0
             objects {matrix; n x 3} -- objects to be placed on grid
         """
-        self.xSize = worldSize[0]
-        self.ySize = worldSize[1]
+        self.x_size = worldSize[0]
+        self.y_size = worldSize[1]
         self.representation = np.zeros(worldSize)
         self.blocks = np.zeros(worldSize)
-        self.collisionPenalty = parameters[1]
-        self.itemList = np.array(parameters[0])
+        self.collision_penalty = parameters[1]
+        self.item_list = np.array(parameters[0])
         self.epoch = 0
         self.ACTION_BANK = action_specs[0]
         self.ACTION_EFFECTS = action_specs[1]
         # reversed because its rows x columns
-        self.agentExists = False
-        for [value, canEnter, xCoord, yCoord] in parameters[0]:
-            self.representation[yCoord, xCoord] = value
+        self.does_agent_exist = False
+        for [value, canEnter, x_coord, y_coord] in parameters[0]:
+            self.representation[y_coord, x_coord] = value
             if (not canEnter):
-                self.blocks[yCoord, xCoord] = 1
+                self.blocks[y_coord, x_coord] = 1
 
     def __str__(self):
-        return self.getRepresentation(True, True)
+        return self.get_representation(True, True)
 
-    def placeAgent(self, xCoord, yCoord):
+    def place_agent(self, xCoord, yCoord):
         """Place agent on map; assumes agent doesn't exist.
 
         Arguments:
@@ -48,15 +49,15 @@ class Gridworld:
             bool -- returns False if agent exist
 
         """
-        if (self.agentExists):
+        if (self.does_agent_exist):
             return False
         else:
             self.xAgent = xCoord
             self.yAgent = yCoord
-            self.agentExists = True
+            self.does_agent_exist = True
             self.create_proximity_map()
 
-    def distanceToObjects(self, xCoord, yCoord):
+    def distance_to_objects(self, xCoord, yCoord):
         """Return matrix with distance to relevant objects
 
         Arguments:
@@ -67,11 +68,11 @@ class Gridworld:
             matrix -- matrix of each item and it's value / x delta / y delta
         """
 
-        outputMatrix = [[row[0], row[1] - xCoord, row[2] - yCoord]
-                        for row in self.itemList if row[1]]
-        return outputMatrix
+        distance_matrix = [[row[0], row[1] - xCoord, row[2] - yCoord]
+                           for row in self.item_list if row[1]]
+        return distance_matrix
 
-    def getAgentCoords(self):
+    def get_agent_coords(self):
         """Return agent coordinates (assumes agent has been placed).
 
         Returns:
@@ -92,33 +93,33 @@ class Gridworld:
 
         xEnd = self.xAgent + xyTuple[0]
         yEnd = self.yAgent + xyTuple[1]
-        if (xEnd < 0 or xEnd > self.xSize - 1 or
-            yEnd < 0 or yEnd > self.ySize - 1 or
+        if (xEnd < 0 or xEnd > self.x_size - 1 or
+            yEnd < 0 or yEnd > self.y_size - 1 or
                 self.blocks[yEnd, xEnd] == 1):
             return False
         return True
 
-    def moveAgent(self, action):
+    def move_agent(self, action):
         """Move agent given string action.
 
-        If the agent would go off the grid, the agent maintains its current 
+        If the agent would go off the grid, the agent maintains its current
             position
 
         Arguments:
-            action {int} -- argument for how to move. refers to an index in a 
+            action {int} -- argument for how to move. refers to an index in a
                 common action index bank
 
         Returns:
             int -- Returns reward after action
 
         """
-        if (self.agentExists):
+        if (self.does_agent_exist):
             self.update_proximity_map(self.ACTION_EFFECTS[action])
-            return self.appropriateMove(self.ACTION_EFFECTS[action])
+            return self.appropriate_move(self.ACTION_EFFECTS[action])
         else:
             raise Exception("Agent does not exist!")
 
-    def appropriateMove(self, xyTuple, debugging=False):
+    def appropriate_move(self, xyTuple, debugging=False):
         """Decide if a move is appropriate and take it if necessary
 
         Arguments:
@@ -146,15 +147,15 @@ class Gridworld:
                 if (row[1] == self.xAgent and row[2] == self.yAgent):
                     row[0] = 0
             return output
-        return self.collisionPenalty
+        return self.collision_penalty
 
-    def getRepresentation(self, showAgent=False, scaleEnvironment=False):
+    def get_representation(self, showAgent=False, scaleEnvironment=False):
         """Return matrix form of total environment.
 
         Keyword Arguments:
-            scaleEnvironment {bool} -- whether to represent the rewards in a scaled way
-                to allow better visual representation
-            showAgent {bool} -- whether to show the agent in the 
+            scaleEnvironment {bool} -- whether to represent the rewards in a
+                scaled way to allow better visual representation
+            showAgent {bool} -- whether to show the agent in the
                 matrix representation (default: {False})
 
         Returns:
@@ -168,7 +169,7 @@ class Gridworld:
             output[self.yAgent, self.xAgent] = 255
         return output
 
-    def returnVision(self, xDist, yDist):
+    def return_vision(self, xDist, yDist):
         """Return what an agent "would" be able to see
 
         Arguments:
@@ -176,20 +177,19 @@ class Gridworld:
             yDist {int} -- distance the agent can see in the y direction
 
         Returns:
-            matrix or boolean -- matrix of the vision with the reward values, 
+            matrix or boolean -- matrix of the vision with the reward values,
             false if there is an unexpected error
         """
 
-        if (self.agentExists):
+        if (self.does_agent_exist):
             output = np.zeros((2 * yDist + 1, 2 * xDist + 1))
-            agentCoord = self.getAgentCoords()
-            samplePoints = []
 
             for xCoord in range(-xDist, xDist + 1):
                 for yCoord in range(-yDist, yDist + 1):
                     xPos = self.xAgent + xCoord
                     yPos = self.yAgent + yCoord
-                    if (xPos < 0 or xPos >= self.xSize) or (yPos < 0 or yPos >= self.ySize):
+                    if (xPos < 0 or xPos >= self.x_size) or (
+                            yPos < 0 or yPos >= self.y_size):
                         output[yCoord + yDist, xCoord + xDist] = -np.infty
                     else:
                         output[yCoord + yDist, xCoord +
@@ -208,7 +208,7 @@ class Gridworld:
             matrix -- matrix representation of environment
         """
 
-        output = np.array(self.getRepresentation(True, True))
+        output = np.array(self.get_representation(True, True))
         if (self.move_possible(xyTuple)):
             output[self.yAgent, self.xAgent] = 0
             output[self.yAgent + xyTuple[1], self.xAgent + xyTuple[0]] = 1
@@ -216,7 +216,7 @@ class Gridworld:
         else:
             return output
 
-    def getEpoch(self):
+    def get_epoch(self):
         """Return the epoch of the current trial
 
         Returns:
@@ -226,11 +226,12 @@ class Gridworld:
         return self.epoch
 
     def create_proximity_map(self):
-        """Create a proximity map showing the distance to each of the objects and their values
+        """Create a proximity map showing the distance to each of the objects
+        and their values
         """
 
         self.prox_map = np.array([row[[0, 2, 3]]
-                                  for row in self.itemList if row[1]])
+                                  for row in self.item_list if row[1]])
         self.prox_map[:, 1] -= (self.xAgent)
         self.prox_map[:, 2] -= (self.yAgent)
 
@@ -256,12 +257,12 @@ class Gridworld:
 
     def calculate_prox_map(self):
         prox_map = np.array([row[[0, 2, 3]]
-                             for row in self.itemList if row[1]])
+                             for row in self.item_list if row[1]])
         prox_map[:, 1] -= (self.xAgent)
         prox_map[:, 2] -= (self.yAgent)
         return prox_map
 
     def load_world(self, directory):
         parameters = p.load(open(directory, 'rb'))
-        self.itemList = parameters[0]
-        self.collisionPenalty = parameters[1]
+        self.item_list = parameters[0]
+        self.collision_penalty = parameters[1]

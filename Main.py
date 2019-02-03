@@ -77,11 +77,11 @@ def run_trial(agent, world_template, rounds, epochs, save=True):
 
     for roundNum in range(rounds):
         agent.set_world(world)
-        world.placeAgent(10, 10)
+        world.place_agent(10, 10)
         for epoch in range(epochs):
-            agent.consume_reward(world.moveAgent(
+            agent.consume_reward(world.move_agent(
                 agent.execute_policy()))
-            cv2.imshow('image', cv2.resize(world.getRepresentation(
+            cv2.imshow('image', cv2.resize(world.get_representation(
                 showAgent=True, scaleEnvironment=True), (200, 200),
                 interpolation=cv2.INTER_NEAREST))
             cv2.waitKey(20)

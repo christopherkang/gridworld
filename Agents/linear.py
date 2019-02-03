@@ -33,9 +33,9 @@ class Linear(Model_NP):
         """
 
         if (self.WEIGHT_SCHEME == "RAND"):
-            self.weights = np.random.rand((self.WORLD.itemList.shape)[0], 2)
+            self.weights = np.random.rand((self.WORLD.item_list.shape)[0], 2)
         elif (self.WEIGHT_SCHEME == "ZERO"):
-            self.weights = np.zeros(((self.WORLD.itemList.shape)[0], 2))
+            self.weights = np.zeros(((self.WORLD.item_list.shape)[0], 2))
         else:
             raise Exception('Unknown Weight Scheme')
 
