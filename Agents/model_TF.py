@@ -47,11 +47,6 @@ class Model_TF(Agent):
         self.saver = tf.train.Saver()
 
     def gradientDescent(self, learningRate, reward, prediction_0, environment):
-        # gradients = self.optimizer.compute_gradients(self.model)
-        # variationRate = learningRate * (
-        #     reward + self.DECAY * self.predict_value(environment) - (prediction_0))
-        # evaluatedGradients = [(tf.math.scalar_mul(np.asscalar(variationRate), gv[0]), gv[1])
-        #                       for gv in gradients]
 
         # self.optimizer.apply_gradients(evaluatedGradients)
         currentPred = self.predict_value(environment)

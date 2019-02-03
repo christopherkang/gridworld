@@ -57,7 +57,7 @@ class Agent:
         return choice
 
     def consume_reward(self, reward, world=""):
-        """Consume reward 
+        """Consume reward
 
         Arguments:
             reward {int} -- reward value
@@ -69,7 +69,8 @@ class Agent:
         print(f"Reward: {reward} | Total Reward: {self.totalReward} ")
 
     def save_model(self, directoryNum, roundNum, epoch):
-        """Save model - only creates the directory if necessary. Child models should define which weights need to be saved, etc.
+        """Save model - only creates the directory if necessary.
+        Child models should define which weights need to be saved, etc.
 
         Arguments:
             directoryNum {int} -- directory num

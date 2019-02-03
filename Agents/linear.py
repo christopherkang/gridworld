@@ -1,9 +1,11 @@
-from .model_NP import Model_NP
 import numpy as np
+
+from .model_NP import Model_NP
 
 
 class Linear(Model_NP):
-    def __init__(self, epsilon, decay, availableActions, dimensions, weight_scheme="RAND", learning_rate=0.001):
+    def __init__(self, epsilon, decay, availableActions, dimensions,
+                 weight_scheme="RAND", learning_rate=0.001):
         super().__init__(self, epsilon, decay, availableActions, dimensions)
         self.WEIGHTS_SET = False
         self.LEARNING_RATE = learning_rate
@@ -17,10 +19,6 @@ class Linear(Model_NP):
             rewards {int} -- reward from the action just taken
         """
 
-        # formula :
-        # w <- w + alpha [R + gamma v(s') - v(s)]del v(s) wrt w
-        # because this is a linear model, del is 1
-        # w <- w + alpha [R + gamma v(s') - v(s)]
         var_rate = self.LEARNING_RATE * \
             (rewards + self.DECAY * self.predict_value() - self.PREDICTION_0)
         print(var_rate)
@@ -30,7 +28,7 @@ class Linear(Model_NP):
         """Initializes weights
 
         Raises:
-            Exception -- if the weight scheme given during initialization 
+            Exception -- if the weight scheme given during initialization
             does not exist an appropriate scheme, throw an exception
         """
 
@@ -74,15 +72,7 @@ class Linear(Model_NP):
             environment {Gridworld} -- gridworld object
             actionIndex {int} -- int of the action
         """
-        # 0 - wait let's actually square 1, 2 lol bc then it'll avoid negs HAH
-        # 1. multiply 1,2 of proxmap with weights
-        # 2. sum products
-        # 3. mutliply 0 with products
-        # 4. sum products
 
-        # this is essentially gradient ASCENT
-
-        def squarer(x): return x**2
         if not actionIndex:
             proximity_map = self.WORLD.update_proximity_map(
                 (0, 0), speculative=True)
@@ -90,17 +80,13 @@ class Linear(Model_NP):
             proximity_map = self.WORLD.update_proximity_map(
                 self.ACTION_EFFECTS[actionIndex], speculative=True)
 
-        # distances = squarer(proximity_map[:, 1:])
         self.distances = abs(proximity_map[:, 1:])
-
         product_sums = np.sum(self.distances * self.weights, axis=1)
-
         value = -np.sum(product_sums)
-
         return value
 
     def load_model(self, directory):
-        """Load a model from a specific directory. 
+        """Load a model from a specific directory.
         Should be saved as an np.savetxt file.
 
         Arguments:
@@ -110,11 +96,10 @@ class Linear(Model_NP):
         self.weights = np.loadtxt(directory)
 
     def get_weights(self):
-        """Helper for the model save method. 
+        """Helper for the model save method.
         Should return the relevant weights of a model that need to be saved.
 
         Returns:
             matrix -- matrix of the weights
         """
-
         return self.weights
