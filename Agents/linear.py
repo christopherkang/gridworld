@@ -21,8 +21,17 @@ class Linear(Model_NP):
 
         var_rate = self.LEARNING_RATE * \
             (rewards + self.DECAY * self.predict_value() - self.PREDICTION_0)
-        print(var_rate)
-        self.weights -= var_rate * self.distances
+        print(f"varRate: {var_rate}")
+        # self.weights += var_rate * self.distances
+        delta = var_rate * np.sum(self.distances, axis=0)
+        self.weights += delta
+
+    def mc_update(self, episode):
+        # matrix structured as Reward, state value, x_sum, y_sum
+
+        for epoch in episode:
+            delta = self.LEARNING_RATE * (epoch[0] - epoch[1]) * epoch[[2, 3]]
+            self.weights += delta
 
     def init_weights(self):
         """Initializes weights
@@ -35,7 +44,8 @@ class Linear(Model_NP):
         if (self.WEIGHT_SCHEME == "RAND"):
             self.weights = np.random.rand((self.WORLD.item_list.shape)[0], 2)
         elif (self.WEIGHT_SCHEME == "ZERO"):
-            self.weights = np.zeros(((self.WORLD.item_list.shape)[0], 2))
+            # self.weights = np.zeros(((self.WORLD.item_list.shape)[0], 2))
+            self.weights = np.zeros((1, 2))
         else:
             raise Exception('Unknown Weight Scheme')
 
@@ -65,7 +75,7 @@ class Linear(Model_NP):
             self.WEIGHTS_SET = True
         # print(world)
 
-    def predict_value(self, actionIndex="", debug=False):
+    def predict_value(self, actionIndex="", debug=False, return_sums=False):
         """Produces state value prediction.
 
         Arguments:
@@ -81,8 +91,21 @@ class Linear(Model_NP):
                 self.ACTION_EFFECTS[actionIndex], speculative=True)
 
         self.distances = abs(proximity_map[:, 1:])
-        product_sums = np.sum(self.distances * self.weights, axis=1)
-        value = -np.sum(product_sums)
+        available_items = proximity_map[:, 0] != 0
+
+        # product_sums = np.sum(
+        #     self.distances[available_items] *
+        #     self.weights[available_items],
+        #     axis=1)
+        # value = np.sum(product_sums)
+
+        sums = np.sum(self.distances[available_items], axis=0)
+
+        value = np.sum(sums * self.weights)
+
+        if return_sums:
+            return value, sums
+
         return value
 
     def load_model(self, directory):

@@ -55,7 +55,7 @@ class Gridworld:
             self.x_agent = x_coord
             self.y_agent = y_coord
             self.does_agent_exist = True
-            self.create_proximity_map()
+            self.prox_map = self.calculate_prox_map()
 
     def distance_to_objects(self, x_coord, y_coord):
         """Return matrix with distance to relevant objects
@@ -225,15 +225,15 @@ class Gridworld:
 
         return self.epoch
 
-    def create_proximity_map(self):
-        """Create a proximity map showing the distance to each of the objects
-        and their values
-        """
+    # def create_proximity_map(self):
+    #     """Create a proximity map showing the distance to each of the objects
+    #     and their values
+    #     """
 
-        self.prox_map = np.array([row[[0, 2, 3]]
-                                  for row in self.item_list if row[1]])
-        self.prox_map[:, 1] -= (self.x_agent)
-        self.prox_map[:, 2] -= (self.y_agent)
+    #     self.prox_map = np.array([row[[0, 2, 3]]
+    #                               for row in self.item_list if row[1]])
+    #     self.prox_map[:, 1] -= (self.x_agent)
+    #     self.prox_map[:, 2] -= (self.y_agent)
 
     def update_proximity_map(self, xy_tuple, speculative=False):
         """Update proximity map
@@ -257,9 +257,11 @@ class Gridworld:
 
     def calculate_prox_map(self):
         prox_map = np.array([row[[0, 2, 3]]
-                             for row in self.item_list if row[1]])
+                             for row in self.item_list if row[1]], dtype=np.float)
         prox_map[:, 1] -= (self.x_agent)
         prox_map[:, 2] -= (self.y_agent)
+        prox_map[:, 1] = prox_map[:, 1] / float(self.x_size)
+        prox_map[:, 2] = prox_map[:, 2] / float(self.y_size)
         return prox_map
 
     def load_world(self, directory):

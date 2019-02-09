@@ -73,7 +73,7 @@ class Agent:
             print(self.ACTION_BANK[choice])
         return choice
 
-    def consume_reward(self, reward, world=""):
+    def consume_reward(self, reward, round, world=""):
         """Consume reward
 
         Arguments:
@@ -82,8 +82,9 @@ class Agent:
         """
 
         self.total_reward += reward
-        self.gradient_descent(reward)
-        print(f"Reward: {reward} | Total Reward: {self.total_reward} ")
+        # self.gradient_descent(reward)
+        print(
+            f"Reward: {reward} | Total Reward: {self.total_reward} | Round: {round}")
 
     def save_model(self, directoryNum, roundNum, epoch):
         """Save model - only creates the directory if necessary.

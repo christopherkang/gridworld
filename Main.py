@@ -1,4 +1,3 @@
-import copy
 import os
 import pickle as p
 
@@ -66,16 +65,31 @@ def showPotentialAction(environment):
     cv2.destroyAllWindows()
 
 
-def run_epoch(agent, world, round_num, epochs, save=True):
+def run_epoch(agent, world, round_num, epochs, save=True, animate=True):
+    GAMMA = 0.9
+    MC_matrix = np.zeros((epochs, 4))
     for epoch in range(epochs):
-        agent.consume_reward(world.move_agent(
-            agent.execute_policy()))
-        cv2.imshow('image', cv2.resize(world.get_representation(
-            showAgent=True, scaleEnvironment=True), (200, 200),
-            interpolation=cv2.INTER_NEAREST))
-        cv2.waitKey(20)
+        action_choice = agent.execute_policy()
+        reward = world.move_agent(action_choice)
+        agent.consume_reward(reward, round_num)
+        MC_matrix[epoch, 0] = reward
+        MC_matrix[epoch, 1], MC_matrix[epoch,
+                                       [2, 3]] = agent.predict_value(return_sums=True)
+        # agent.gradient_descent(reward) # use this line for per epoch update
+        if animate:
+            cv2.imshow('image', cv2.resize(world.get_representation(
+                showAgent=True, scaleEnvironment=True), (200, 200),
+                interpolation=cv2.INTER_NEAREST))
+            cv2.waitKey(20)
         if save:
             agent.save_model(RUN_NUM, round_num, epoch)
+    update_matrix = MC_matrix.copy()
+    for index in range(epochs):
+        run_sum = 0
+        for sum_range in range(index, epochs):
+            run_sum += GAMMA**(sum_range - index) * MC_matrix[sum_range, 0]
+        update_matrix[index, 0] = run_sum
+    agent.mc_update(update_matrix)
 
 
 def run_trial(agent, rounds, epochs, save=True):
@@ -107,7 +121,7 @@ def test_agent(directory):
 if __name__ == "__main__":
     agent = linear.Linear(
         0.1, 0.9, ACTION_INFO, WORLD_SIZE,
-        weight_scheme="ZERO", learning_rate=0.01
+        weight_scheme="ZERO", learning_rate=0.0005
     )
     # agent = test_agent("/Models/tmp9/r50/modele99.txt")
     # world.load_world("/Models/tmp9/env.txt")
