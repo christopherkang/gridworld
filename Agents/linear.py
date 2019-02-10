@@ -1,6 +1,7 @@
 import numpy as np
 
 from .model_NP import Model_NP
+# import .weight_generator as w
 
 
 class Linear(Model_NP):
@@ -30,8 +31,9 @@ class Linear(Model_NP):
         # matrix structured as Reward, state value, x_sum, y_sum
 
         for epoch in episode:
-            delta = self.LEARNING_RATE * (epoch[0] - epoch[1]) * epoch[[2, 3]]
-            self.weights += delta
+            delta = self.LEARNING_RATE * (epoch[0] - epoch[1])
+            self.weights += delta * epoch[[2, 3]]
+            self.bias += delta
 
     def init_weights(self):
         """Initializes weights
@@ -41,11 +43,16 @@ class Linear(Model_NP):
             does not exist an appropriate scheme, throw an exception
         """
 
+        # generator = w._GENERATION_TYPES[self.WEIGHT_SCHEME]
+
         if (self.WEIGHT_SCHEME == "RAND"):
-            self.weights = np.random.rand((self.WORLD.item_list.shape)[0], 2)
+            # sample from random uniform distribution of (-1, 1)
+            self.weights = np.random.rand(1, 2) * 2 - 1
+            self.bias = np.random.random_sample() * 2 - 1
         elif (self.WEIGHT_SCHEME == "ZERO"):
             # self.weights = np.zeros(((self.WORLD.item_list.shape)[0], 2))
             self.weights = np.zeros((1, 2))
+            self.bias = 0
         else:
             raise Exception('Unknown Weight Scheme')
 
@@ -106,7 +113,7 @@ class Linear(Model_NP):
         if return_sums:
             return value, sums
 
-        return value
+        return value + self.bias
 
     def load_model(self, directory):
         """Load a model from a specific directory.

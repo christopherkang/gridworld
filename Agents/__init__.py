@@ -4,4 +4,5 @@ __all__ = [
     "pixel_CNN",
     "model_NP",
     "model_TF",
-    "A2C"]
+    "A2C",
+    "weight_generator.py"]

@@ -48,7 +48,8 @@ def randomly_create_objects(number_of_objects, reward, xyDimension,
     return output
 
 
-auto_params = [randomly_create_objects(10, 1, WORLD_SIZE), 0]
+#auto_params = [randomly_create_objects(1, 1, WORLD_SIZE), 0]
+auto_params = [[[1, True, 5, 5]], 0]
 
 
 def showPotentialAction(environment):
@@ -121,7 +122,7 @@ def test_agent(directory):
 if __name__ == "__main__":
     agent = linear.Linear(
         0.1, 0.9, ACTION_INFO, WORLD_SIZE,
-        weight_scheme="ZERO", learning_rate=0.0005
+        weight_scheme="RAND", learning_rate=0.01
     )
     # agent = test_agent("/Models/tmp9/r50/modele99.txt")
     # world.load_world("/Models/tmp9/env.txt")

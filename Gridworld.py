@@ -3,12 +3,6 @@ import pickle as p
 
 
 class Gridworld:
-    """Gridworld class
-
-    Returns:
-        [type] -- [description]
-    """
-
     def __init__(self, worldSize, action_specs, parameters):
         """Create Gridworld.
 
@@ -256,6 +250,12 @@ class Gridworld:
             self.prox_map = self.calculate_prox_map()
 
     def calculate_prox_map(self):
+        """Calculate the proximity map
+
+        Returns:
+            matrix -- format of [Reward, x distance, y distance]
+        """
+
         prox_map = np.array([row[[0, 2, 3]]
                              for row in self.item_list if row[1]], dtype=np.float)
         prox_map[:, 1] -= (self.x_agent)
@@ -265,6 +265,12 @@ class Gridworld:
         return prox_map
 
     def load_world(self, directory):
+        """Load world from directory
+
+        Arguments:
+            directory {string} -- string of directory, including the name of the pickle file
+        """
+
         parameters = p.load(open(directory, 'rb'))
         self.item_list = parameters[0]
         self.collision_penalty = parameters[1]
