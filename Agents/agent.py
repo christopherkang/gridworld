@@ -40,7 +40,7 @@ class Agent:
 
         """
         max_index = -1
-        max_value = -np.nan
+        max_value = -float("inf")
         number_of_actions = len(self.ACTION_BANK)
         state_values = []
         probability_list = np.zeros((number_of_actions))
@@ -58,6 +58,7 @@ class Agent:
         if (max_index == -1):
             # if there is no best action, all actions have equal probability
             probability_list += 1 / number_of_actions
+            # THIS NEED TO BE ONLY THE TWO BEST ACTIONS #FLAG
         else:
             # use e-greedy approach
             probability_list += self.EPSILON / number_of_actions

@@ -1,7 +1,7 @@
 import numpy as np
 
 from .model_NP import Model_NP
-# import .weight_generator as w
+from .weight_generator import w_generator
 
 
 class Linear(Model_NP):
@@ -23,6 +23,7 @@ class Linear(Model_NP):
         var_rate = self.LEARNING_RATE * \
             (rewards + self.DECAY * self.predict_value() - self.PREDICTION_0)
         print(f"varRate: {var_rate}")
+        print("")
         # self.weights += var_rate * self.distances
         delta = var_rate * np.sum(self.distances, axis=0)
         self.weights += delta
@@ -43,16 +44,17 @@ class Linear(Model_NP):
             does not exist an appropriate scheme, throw an exception
         """
 
-        # generator = w._GENERATION_TYPES[self.WEIGHT_SCHEME]
+        w = w_generator._GENERATION_TYPES[self.WEIGHT_SCHEME]
+        print(w[1])
 
         if (self.WEIGHT_SCHEME == "RAND"):
             # sample from random uniform distribution of (-1, 1)
-            self.weights = np.random.rand(1, 2) * 2 - 1
-            self.bias = np.random.random_sample() * 2 - 1
-        elif (self.WEIGHT_SCHEME == "ZERO"):
+            self.weights = w[0]((1, 2), -1, 1)
+            self.bias = w[0]((1), -1, 1)
+        elif (self.WEIGHT_SCHEME == "CONST"):
             # self.weights = np.zeros(((self.WORLD.item_list.shape)[0], 2))
-            self.weights = np.zeros((1, 2))
-            self.bias = 0
+            self.weights = w[0]((1, 2), 0)
+            self.bias = w[0]((1), 0)
         else:
             raise Exception('Unknown Weight Scheme')
 
@@ -108,12 +110,12 @@ class Linear(Model_NP):
 
         sums = np.sum(self.distances[available_items], axis=0)
 
-        value = np.sum(sums * self.weights)
+        value = np.sum(sums * self.weights) + self.bias
 
         if return_sums:
             return value, sums
 
-        return value + self.bias
+        return value
 
     def load_model(self, directory):
         """Load a model from a specific directory.

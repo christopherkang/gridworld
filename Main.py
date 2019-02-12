@@ -23,7 +23,7 @@ params = [[[0.5, True, 3, 4],
            [0.5, True, 3, 2], ],
           0]
 
-WORLD_SIZE = (11, 11)
+WORLD_SIZE = (2, 2)
 
 RUN_NUM = input("What run is this? ")
 
@@ -49,7 +49,7 @@ def randomly_create_objects(number_of_objects, reward, xyDimension,
 
 
 #auto_params = [randomly_create_objects(1, 1, WORLD_SIZE), 0]
-auto_params = [[[1, True, 5, 5]], 0]
+auto_params = [[[1, True, 1, 1]], 0]
 
 
 def showPotentialAction(environment):
@@ -84,6 +84,8 @@ def run_epoch(agent, world, round_num, epochs, save=True, animate=True):
             cv2.waitKey(20)
         if save:
             agent.save_model(RUN_NUM, round_num, epoch)
+        if reward != 0:
+            break
     update_matrix = MC_matrix.copy()
     for index in range(epochs):
         run_sum = 0
@@ -104,7 +106,7 @@ def run_trial(agent, rounds, epochs, save=True):
     for round_num in range(rounds):
         world = Gridworld(WORLD_SIZE, ACTION_INFO, auto_params)
         agent.set_world(world)
-        world.place_agent(10, 10)
+        world.place_agent(0, 0)
         run_epoch(agent, world, round_num, epochs, save=save)
         if save:
             agent.end_round(RUN_NUM, round_num)
@@ -122,8 +124,8 @@ def test_agent(directory):
 if __name__ == "__main__":
     agent = linear.Linear(
         0.1, 0.9, ACTION_INFO, WORLD_SIZE,
-        weight_scheme="RAND", learning_rate=0.01
+        weight_scheme="RAND", learning_rate=0.1
     )
     # agent = test_agent("/Models/tmp9/r50/modele99.txt")
     # world.load_world("/Models/tmp9/env.txt")
-    run_trial(agent, 100, 100, save=True)
+    run_trial(agent, 100, 10, save=True)
