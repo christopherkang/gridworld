@@ -39,7 +39,7 @@ class Agent:
         Arguments:
 
         """
-        max_index = -1
+        max_index = []
         max_value = -float("inf")
         number_of_actions = len(self.ACTION_BANK)
         state_values = []
@@ -51,19 +51,19 @@ class Agent:
             state_values.append(actionVal)
             if actionVal > max_value:
                 # if the value is greater than the previous
-                max_index = index
+                max_index = [index]
                 max_value = actionVal
-        print(state_values)
+            elif actionVal == max_value:
+                max_index.append(index)
 
-        if (max_index == -1):
-            # if there is no best action, all actions have equal probability
+        print(state_values)
+        is_experimental = np.random.choice(
+            2, p=[1 - self.EPSILON, self.EPSILON]) == 1
+
+        if (is_experimental):
             probability_list += 1 / number_of_actions
-            # THIS NEED TO BE ONLY THE TWO BEST ACTIONS #FLAG
         else:
-            # use e-greedy approach
-            probability_list += self.EPSILON / number_of_actions
-            probability_list[max_index] = 1 - self.EPSILON + \
-                self.EPSILON / number_of_actions
+            probability_list[max_index] += 1.0 / len(max_index)
 
         choice = int(
             np.random.choice(
@@ -86,6 +86,7 @@ class Agent:
         # self.gradient_descent(reward)
         print(
             f"Reward: {reward} | Total Reward: {self.total_reward} | Round: {round}")
+        print()
 
     def save_model(self, directoryNum, roundNum, epoch):
         """Save model - only creates the directory if necessary.

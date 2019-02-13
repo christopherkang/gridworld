@@ -137,7 +137,7 @@ class Gridworld:
             self.representation[self.y_agent, self.x_agent] = 0
 
             # remove item from proximity map
-            for row in self.prox_map:
+            for row in self.item_list:
                 if (row[1] == self.x_agent and row[2] == self.y_agent):
                     row[0] = 0
             return output
