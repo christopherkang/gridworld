@@ -46,7 +46,7 @@ class Agent:
         probability_list = np.zeros((number_of_actions))
 
         for index in range(number_of_actions):  # for each action
-            actionVal = np.asscalar((self.predict_value(index)))
+            actionVal = self.predict_value(index)
             # predict the state value of the action
             state_values.append(actionVal)
             if actionVal > max_value:

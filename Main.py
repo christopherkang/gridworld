@@ -87,7 +87,7 @@ def run_epoch(agent, world, round_num, epochs, save=True, animate=True):
         if agent.total_reward == len(auto_params[0]):
             # FLAG THIS ONLY WORKS WITH ALL POSITIVE, 1 VALUED OBJECTS
             break
-        input()
+        # input()
     update_matrix = MC_matrix.copy()
     for index in range(epochs):
         run_sum = 0

@@ -268,6 +268,7 @@ class Gridworld:
         for row in prox_map:  # make hit items worth 0
             if row[1] == 0 and row[2] == 0:
                 row[0] = 0
+        print(prox_map)
         return prox_map
 
     def load_world(self, directory):
