@@ -84,8 +84,10 @@ def run_epoch(agent, world, round_num, epochs, save=True, animate=True):
             cv2.waitKey(20)
         if save:
             agent.save_model(RUN_NUM, round_num, epoch)
-        if reward == len(auto_params[0]):
+        if agent.total_reward == len(auto_params[0]):
+            # FLAG THIS ONLY WORKS WITH ALL POSITIVE, 1 VALUED OBJECTS
             break
+        input()
     update_matrix = MC_matrix.copy()
     for index in range(epochs):
         run_sum = 0
@@ -122,9 +124,13 @@ def test_agent(directory):
 
 
 if __name__ == "__main__":
+    # agent = linear.Linear(
+    #     0.1, 0.9, ACTION_INFO, WORLD_SIZE,
+    #     weight_scheme="RAND", learning_rate=0.05
+    # )
     agent = linear.Linear(
-        0.1, 0.9, ACTION_INFO, WORLD_SIZE,
-        weight_scheme="RAND", learning_rate=0.1
+        0, 0.9, ACTION_INFO, WORLD_SIZE,
+        weight_scheme="IDEAL", learning_rate=0.05
     )
     # agent = test_agent("/Models/tmp9/r50/modele99.txt")
     # world.load_world("/Models/tmp9/env.txt")

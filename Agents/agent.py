@@ -71,7 +71,8 @@ class Agent:
                 1,
                 p=probability_list))
         if print_action:
-            print(self.ACTION_BANK[choice])
+            print(
+                f"{self.ACTION_BANK[choice]}, Experimental: {is_experimental}")
         return choice
 
     def consume_reward(self, reward, round, world=""):

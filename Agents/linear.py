@@ -55,6 +55,9 @@ class Linear(Model_NP):
             # self.weights = np.zeros(((self.WORLD.item_list.shape)[0], 2))
             self.weights = w[0]((1, 2), 0)
             self.bias = w[0]((1), 0)
+        elif (self.WEIGHT_SCHEME == "IDEAL"):
+            self.weights = w[0]((1, 2), 0) - 1
+            self.bias = w[0]((1), 0)
         else:
             raise Exception('Unknown Weight Scheme')
 
@@ -92,7 +95,7 @@ class Linear(Model_NP):
             actionIndex {int} -- int of the action
         """
 
-        if not actionIndex:
+        if actionIndex == "":
             proximity_map = self.WORLD.update_proximity_map(
                 (0, 0), speculative=True)
         else:
@@ -100,7 +103,11 @@ class Linear(Model_NP):
                 self.ACTION_EFFECTS[actionIndex], speculative=True)
 
         self.distances = abs(proximity_map[:, 1:])
-        available_items = proximity_map[:, 0] != 0
+        # available_items = proximity_map[:, 0] != 0
+        available_items = np.where(proximity_map[:, 0] != 0)
+
+        if not available_items:
+            return 0
 
         # product_sums = np.sum(
         #     self.distances[available_items] *

@@ -17,5 +17,6 @@ class w_generator:
 
     _GENERATION_TYPES = {
         "RAND": (random_uniform, "UNIFORM DISTRIBUTION, LOW-HIGH"),
-        "CONST": (constant, "CONSTANT DISTRIBUTION, VALUE")
+        "CONST": (constant, "CONSTANT DISTRIBUTION, VALUE"),
+        "IDEAL": (constant, "CONSTANT DISTRIBUTION, -1")
     }
