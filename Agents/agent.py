@@ -20,6 +20,7 @@ class Agent:
         self.ACTION_BANK = availableActions[0]
         self.ACTION_EFFECTS = availableActions[1]
         self.total_reward = 0
+        self.rewards = 0
         self.EPSILON = epsilon
         self.DECAY = decay
 
@@ -84,6 +85,8 @@ class Agent:
         """
 
         self.total_reward += reward
+        if (reward > 0):
+            self.rewards += 1
         # self.gradient_descent(reward)
         print(
             f"Reward: {reward} | Total Reward: {self.total_reward} | Round: {round}")
@@ -99,7 +102,7 @@ class Agent:
             epoch {int} -- epoch
         """
 
-        save_path = f"/Models/tmp{directoryNum}/r{roundNum}/"
+        save_path = f"{directoryNum}/r{roundNum}/"
         if not os.path.exists(save_path):
             os.makedirs(save_path)
 
@@ -112,6 +115,7 @@ class Agent:
         """
 
         self.total_reward = 0
+        self.rewards = 0
         pass
 
     def gradient_descent(self):

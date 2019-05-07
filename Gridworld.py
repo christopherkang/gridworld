@@ -18,6 +18,8 @@ class Gridworld:
         self.representation = np.zeros(worldSize)
         self.blocks = np.zeros(worldSize)
         self.collision_penalty = parameters[1]
+
+        # form: [reward, passable (bool), xCoord, yCoord]
         self.item_list = np.array(parameters[0])
         self.epoch = 0
         self.ACTION_BANK = action_specs[0]
@@ -25,7 +27,8 @@ class Gridworld:
         # reversed because its rows x columns
         self.does_agent_exist = False
         for [value, canEnter, x_coord, y_coord] in parameters[0]:
-            self.representation[y_coord, x_coord] = value
+            self.representation[2, 2] = 0.1
+            self.representation[int(y_coord), int(x_coord)] = value
             if (not canEnter):
                 self.blocks[y_coord, x_coord] = 1
 
@@ -138,12 +141,13 @@ class Gridworld:
 
             # remove item from proximity map
             for row in self.item_list:
-                if (row[1] == self.x_agent and row[2] == self.y_agent):
+                if (row[2] == self.x_agent and row[3] == self.y_agent):
                     row[0] = 0
             return output
         return self.collision_penalty
 
-    def get_representation(self, showAgent=False, scaleEnvironment=False):
+    def get_representation(self, showAgent=False, scaleEnvironment=False,
+                           cherry_color="FF0000", bomb_color="0000FF"):
         """Return matrix form of total environment.
 
         Keyword Arguments:
@@ -156,11 +160,37 @@ class Gridworld:
             matrix -- matrix representing the environment
 
         """
-        output = np.array(self.representation)
-        if (scaleEnvironment):
-            output /= max(output.max(), 1) * 2
+
+        def int_array_color(color_string):
+            return np.array([int(color_string[0:2], 16), int(
+                color_string[2:4], 16), int(color_string[4:], 16)])
+
+        def replace_color(object_at_location):
+            # print(f"objaloc:{object_at_location}")
+            if object_at_location[0] == 1:
+                # input("no i'ave happened cherry")
+                return int_array_color(cherry_color) / 255
+            elif object_at_location[0] == -1:
+                # input("I'VE HAPPENED????")
+                return int_array_color(bomb_color) / 255
+            else:
+                return np.array([0, 0, 0])
+
+        copy = np.expand_dims(self.representation, axis=2)  # make a copy
+        output = np.concatenate(
+            (copy, np.zeros((copy.shape[0], copy.shape[1], 2))), axis=2)
+        # output = np.swapaxes(output, 0, 2)
+        for row in output:
+            # print(f"row:{row}")
+            for element in row:
+                element = replace_color(element)
+        # output = np.swapaxes(output, 0, 2)
+        # if (scaleEnvironment):
+        #     output /= max(output.max(), 1) * 2
         if (showAgent):
-            output[self.y_agent, self.x_agent] = 255
+            output[self.y_agent, self.x_agent] = [1, 1, 1]
+        # output[2, 2] = int_array_color(cherry_color)
+        # print(f"output: {output}")
         return output
 
     def return_vision(self, x_dist, y_dist):
@@ -182,6 +212,7 @@ class Gridworld:
                 for y_coord in range(-y_dist, y_dist + 1):
                     x_pos = self.x_agent + x_coord
                     y_pos = self.y_agent + y_coord
+
                     if (x_pos < 0 or x_pos >= self.x_size) or (
                             y_pos < 0 or y_pos >= self.y_size):
                         output[y_coord + y_dist, x_coord + x_dist] = -np.infty
@@ -257,19 +288,58 @@ class Gridworld:
         """
 
         prox_map = np.array([row[[0, 2, 3]]
-                             for row in self.item_list if row[1]], dtype=np.float)
+                             for row in self.item_list if row[1]], dtype=np.float, copy=True)
         # np.reshape(prox_map, (-1, 3))
         prox_map[:, 1] -= (np.clip(self.x_agent +
                                    xy_tuple[0], 0, self.x_size - 1))
         prox_map[:, 2] -= (np.clip(self.y_agent +
                                    xy_tuple[1], 0, self.y_size - 1))
+
+        # scaling
         prox_map[:, 1] = prox_map[:, 1] / float(self.x_size - 1)
         prox_map[:, 2] = prox_map[:, 2] / float(self.y_size - 1)
-        for row in prox_map:  # make hit items worth 0
+
+        # make hit items worth 0
+        for row in prox_map:
             if row[1] == 0 and row[2] == 0:
                 row[0] = 0
-        print(prox_map)
+
         return prox_map
+
+    def calculate_grid_map(self, xy_tuple):
+        # we are going to set the first col to be the agent
+        out_map_x = np.zeros(
+            (len(self.item_list) + 1, len(self.item_list) + 1))
+        out_map_y = np.zeros(
+            (len(self.item_list) + 1, len(self.item_list) + 1))
+
+        new_agent_x = np.clip(self.x_agent + xy_tuple[0], 0, self.x_size - 1)
+        new_agent_y = np.clip(self.y_agent + xy_tuple[1], 0, self.y_size - 1)
+
+        out_map_x[0][0] = new_agent_x
+        out_map_y[0][0] = new_agent_y
+
+        # assign the values on the diagnols
+        for index in range(1, len(self.item_list) + 1):
+            out_map_x[index][index] = self.item_list[index - 1][2]
+            out_map_y[index][index] = self.item_list[index - 1][3]
+
+        # we will first compute distances from the agent
+        for target in range(len(self.item_list)):
+            out_map_x[target + 1][0] = new_agent_x - self.item_list[target][2]
+            out_map_y[target + 1][0] = new_agent_y - self.item_list[target][3]
+
+        # now, we will compute distances from objects to each other
+        for source in range(1, len((self.item_list)) + 1):
+            for target in range(source + 1, len(self.item_list) + 1):
+                distance = self.item_list[source - 1][2:] - \
+                    self.item_list[target - 1][2:]
+                out_map_x[target][source] = distance[0]
+                out_map_x[target][source] = distance[1]
+
+        # print(out_map_x, out_map_y)
+
+        return out_map_x, out_map_y
 
     def load_world(self, directory):
         """Load world from directory
